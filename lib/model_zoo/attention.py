@@ -190,6 +190,7 @@ class CrossAttention(nn.Module):
 
         out = einsum('b i j, b j d -> b i d', attn, v)
         out = rearrange(out, '(b h) n d -> b n (h d)', h=h)
+
         return self.to_out(out)
 
 
@@ -254,6 +255,10 @@ class SpatialTransformer(nn.Module):
 
     def forward(self, x, context=None):
         # note: if no context is given, cross-attention defaults to self-attention
+        #with torch.no_grad():
+        #    s = sum(p.cpu().detach().numpy().sum().item() for p in self.parameters())
+        #    print("CrossAttn param sum", s)
+        #print("CrossAttn.input", x.abs().sum())
         b, c, h, w = x.shape
         x_in = x
         x = self.norm(x)
@@ -263,6 +268,7 @@ class SpatialTransformer(nn.Module):
             x = block(x, context=context)
         x = rearrange(x, 'b (h w) c -> b c h w', h=h, w=w).contiguous()
         x = self.proj_out(x)
+        #print("CrossAttn.output", (x+x_in).abs().sum())
         return x + x_in
 
 

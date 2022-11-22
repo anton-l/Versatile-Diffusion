@@ -3,6 +3,8 @@ from functools import partial
 import math
 from typing import Iterable
 
+import torch
+
 import numpy as np
 import torch as th
 import torch.nn as nn
@@ -2285,11 +2287,13 @@ class Linear_MultiDim(nn.Linear):
             *args, **kwargs)
 
     def forward(self, x):
+        #print("linearmd.input", x.abs().sum())
         shape = x.shape
         n = len(self.in_features_multidim)
         x = x.view(*shape[0:-n], self.in_features)
         y = super().forward(x)
         y = y.view(*shape[0:-n], *self.out_features_multidim)
+        #print("linearmd.output", y.abs().sum())
         return y
 
 class FCBlock_MultiDim(FCBlock):
@@ -2321,6 +2325,10 @@ class FCBlock_MultiDim(FCBlock):
             use_checkpoint = use_checkpoint,)
 
     def forward(self, x, emb):
+        #with torch.no_grad():
+        #    s = sum(p.cpu().detach().numpy().sum().item() for p in self.parameters())
+        #    print("resblock param sum", s)
+
         shape = x.shape
         n = len(self.channels_multidim)
         x = x.view(*shape[0:-n], self.channels, 1, 1)
@@ -2329,6 +2337,7 @@ class FCBlock_MultiDim(FCBlock):
             self._forward, (x, emb), self.parameters(), self.use_checkpoint)
         y = y.view(*shape[0:-n], -1)
         y = y.view(*shape[0:-n], *self.out_channels_multidim)
+        #print("resblock.output_tensor", y.abs().sum())
         return y
 
 @register('openai_unet_0dmd', version)

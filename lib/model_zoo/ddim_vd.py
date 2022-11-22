@@ -58,7 +58,16 @@ class DDIMSampler_VD(DDIMSampler):
         device = self.model.device
         bs = shape[0]
         if xt is None:
-            xt = torch.randn(shape, device=device)
+            #xt = torch.randn(shape, device=device)
+            xt = torch.zeros(shape, device=device)
+            if len(shape) == 4:
+                for i in range(bs):
+                    generator = torch.Generator(device=device).manual_seed(0)
+                    xt[i:i+1] = torch.randn((1, shape[1], shape[2], shape[3]), generator=generator, device=device)
+            else:
+                for i in range(bs):
+                    generator = torch.Generator(device=device).manual_seed(0)
+                    xt[i:i+1] = torch.randn((1, shape[1]), generator=generator, device=device)
 
         if timesteps is None:
             timesteps = self.ddpm_num_timesteps if ddim_use_original_steps else self.ddim_timesteps

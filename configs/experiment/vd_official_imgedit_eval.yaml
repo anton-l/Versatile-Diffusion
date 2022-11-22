@@ -1,0 +1,49 @@
+env:
+  debug: false
+  cuda: true
+  dist_backend: nccl
+  matplotlib_mode: agg
+  log_root_dir: log
+  rnd_seed: 20
+
+model: MODEL(vd_noema)
+
+eval:
+  main: lib.experiments.vd_default.eval
+  stage: lib.experiments.vd_default.eval_stage_i2t2i
+
+  dataset: null
+
+  conditioning:
+    - ["assets/horse.png", "a painting of a blue horse", "a painting of a pink horse"]
+    #- ["assets/ghibli.jpg", "a house on a lake", "a tall castle on a lake"]
+
+  replicate: 1
+
+  sample:
+    image_output_dim: [512, 512]
+    text_latent_dim: 768
+    n_samples: 4
+    ddim_steps: 50
+    ddim_eta: 0.0
+    scale: 7.5
+    mixed_ratio: 0.8
+
+  # Some useful post processing
+  prompt_temperature: 1.0
+  prompt_merge_same_adj_word: true
+  color_adj: true
+  color_adj_keep_ratio: 0.5
+  color_adj_simple: true
+
+  batch_size_per_gpu: 0
+  batch_size: null
+  dataset_num_workers_per_gpu: 0
+  dataset_num_workers: null
+
+  pretrained_pth: pretrained/vd-official.pth
+  strict_sd: true
+
+  is_lite: true
+  fix_seed: true
+  eval_subdir: vd_official_imgedit
